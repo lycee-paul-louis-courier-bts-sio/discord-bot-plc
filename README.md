@@ -28,6 +28,21 @@ Il a été conçu pour le serveur Discord du BTS afin d'**automatiser les tâche
 * **Intégration Pronote/Éléa** : Notification des **notes** ou des **devoirs** récents (nécessite une connexion API sécurisée et validée).
 * **Administration** : Commandes avancées pour la **modération** et l'**organisation** du serveur.
 
+## 📦 - Docker compose :
+
+```yml
+---
+services:
+  bot-plc:
+    image: louismedo/plc-bot:0.1
+    container_name: bot-plc
+    restart: unless-stopped
+    environment:
+      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
+      - HF_TOKEN=${HF_TOKEN}
+```
+
+
 ***
 
 ## 🤝 - Contribution :

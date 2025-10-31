@@ -38,6 +38,9 @@ dist/
 *.egg-info/
 *.egg
 
+# Fichiers docker
+/.devcontainer/
+
 
 # #############################################################
 # # FICHIERS D'IDE ET D'ÉDITEUR
