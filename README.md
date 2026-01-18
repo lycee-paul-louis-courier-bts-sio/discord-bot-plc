@@ -39,7 +39,7 @@ Il a été conçu pour le serveur Discord du BTS afin d'**automatiser les tâche
 ---
 services:
   bot-plc:
-    image: louismedo/plc-bot:0.2
+    image: louismedo/plc-bot:0.3
     container_name: bot-plc
     restart: unless-stopped
     environment:
