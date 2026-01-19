@@ -14,6 +14,7 @@ Il a été conçu pour le serveur Discord du BTS afin d'**automatiser les tâche
 | :----------------------: | :---------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------- |
 |         **Base**         | `/help`, `/ping`        | Commandes d'aide et de vérification de l'état du Bot. **Messages de bienvenue** automatiques aux nouveaux membres.                               |
 | **Veille Technologique** | Publication automatique | 𝗣𝘂𝗯𝗹𝗶𝗰𝗮𝘁𝗶𝗼𝗻 𝗮𝘂𝘁𝗼𝗺𝗮𝘁𝗶𝗾𝘂𝗲 d’articles de veille technologique dans un salon dédié, accompagnée d’un **résumé généré par IA**. |
+| **Veille CVE** | Publication automatique | 𝗣𝘂𝗯𝗹𝗶𝗰𝗮𝘁𝗶𝗼𝗻 𝗮𝘂𝘁𝗼𝗺𝗮𝘁𝗶𝗾𝘂𝗲 d’articles de CVE publié par le **CIRCL** dans un salon dédié. |
 | **IA Conversationnelle** | `/ask`                  | 𝗜𝗻𝘁𝗲𝗿𝗮𝗰𝘁𝗶𝗼𝗻 𝗮𝘃𝗲𝗰 𝘂𝗻𝗲 𝗜𝗔 (modèle **LLaMA**) pour poser des questions techniques directement depuis Discord.                   |
 
 ---
@@ -33,18 +34,26 @@ Il a été conçu pour le serveur Discord du BTS afin d'**automatiser les tâche
 
 ---
 
-## 📦 - Docker Compose :
+## 📦 Utilisation du bot
 
-```yml
+1. Copier le docker compose ci-dessous.
+```yaml
 ---
 services:
   bot-plc:
-    image: louismedo/plc-bot:0.3
+    image: ghcr.io/lycee-paul-louis-courier-bts-sio/discord-bot-plc:latest
     container_name: bot-plc
     restart: unless-stopped
-    environment:
-      - DISCORD_BOT_TOKEN=${DISCORD_BOT_TOKEN}
-      - HF_TOKEN=${HF_TOKEN}
+    env_file:
+      - .env
+```
+
+2. Remplir le `.env` comme ceci :
+```.env
+VEILLE_CVE_CHANNEL_ID="votre_salon_cve"
+VEILLE_CHANNEL_ID="votre_salon_veille_tech"
+DISCORD_BOT_TOKEN="token_de_votre_bot"
+HF_TOKEN="token_api_ia"
 ```
 
 ---
