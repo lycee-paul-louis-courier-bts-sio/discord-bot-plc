@@ -1,0 +1,72 @@
+name: Build & Push Docker Image
+
+# DÉCLENCHEURS (Triggers)
+on:
+  push:
+    branches: [ "main" ]    # Se lance quand on push sur main
+    tags: [ 'v*.*.*' ]      # Se lance aussi quand on crée un tag (ex: v1.0.0)
+
+# VARIABLES D'ENVIRONNEMENT GLOBALES
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    # PERMISSIONS (Sécurité)
+    permissions:
+      contents: read       # Pour lire le code
+      packages: write      # Pour écrire l'image dans le registre
+
+    steps:
+      # 1. Récupération du code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Nécessaire pour récupérer tous les tags Git
+
+      # 2. Génération de la version de l'application
+      - name: Generate App Version
+        id: version
+        run: |
+          # Si on est sur un tag exact, ça donne v1.0.0
+          # Si on est sur main après un tag, ça donne v1.0.0-4-g3a1b (version précise)
+          echo "APP_VERSION=$(git describe --tags --always --dirty)" >> $GITHUB_OUTPUT
+
+      # 3. Connexion au registre GitHub (GHCR)
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }} # Token généré automatiquement par GitHub
+
+      # 4. Extraction des métadonnées (Tags et Labels)
+      # Cela gère automatiquement le tag 'latest' et le tag de version 'v1.0.0'
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            # Si branche (main), on ajoute le tag 'latest'
+            type=raw,value=latest,enable={{is_default_branch}}
+            # Garde le nom de la branche (main)
+            type=ref,event=tag
+            # Gestion tags Git (v1.0.0) automatiquement
+            type=semver,pattern={{version}}
+
+      # 4. Construction et Envoi (Build & Push)
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          # Utilise les tags générés à l'étape 3
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Injection de la version pour l'injection dans le code PYTHON.
+          build-args: |
+            APP_VERSION=${{ steps.version.outputs.APP_VERSION }}
