@@ -3,8 +3,8 @@ name: Build & Push Docker Image
 # DÉCLENCHEURS (Triggers)
 on:
   push:
-    branches: [ "main" ]    # Se lance quand on push sur main
-    tags: [ 'v*.*.*' ]      # Se lance aussi quand on crée un tag (ex: v1.0.0)
+    tags: 
+      - 'v*.*.*'
 
 # VARIABLES D'ENVIRONNEMENT GLOBALES
 env:
@@ -14,8 +14,6 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    
-    # PERMISSIONS (Sécurité)
     permissions:
       contents: read       # Pour lire le code
       packages: write      # Pour écrire l'image dans le registre
@@ -43,20 +41,29 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }} # Token généré automatiquement par GitHub
 
-      # 4. Extraction des métadonnées (Tags et Labels)
-      # Cela gère automatiquement le tag 'latest' et le tag de version 'v1.0.0'
+      # * Génération des tags Docker *
+      # À partir du tag Git "v1.2.3", on génère :
+      #   - ghcr.io/org/app:v1.2.3  → version exacte (immuable)
+      #   - ghcr.io/org/app:v1.2    → majeur.mineur (reçoit les patchs)
+      #   - ghcr.io/org/app:v1      → majeur seul   ← FluxCD pointe ici
+      #   - ghcr.io/org/app:latest  → dernier build
+      #
+      # FluxCD avec ImagePolicy semver: '>= 1.0.0 < 2.0.0'
+      # mettra à jour automatiquement tant qu'on reste en v1.x.x
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            # Si branche (main), on ajoute le tag 'latest'
-            type=raw,value=latest,enable={{is_default_branch}}
-            # Garde le nom de la branche (main)
-            type=ref,event=tag
-            # Gestion tags Git (v1.0.0) automatiquement
+            # Tag semver complet : v1.2.3
             type=semver,pattern={{version}}
+            # Majeur.mineur : v1.2 (reçoit automatiquement les patchs)
+            type=semver,pattern={{major}}.{{minor}}
+            # Majeur seul : v1 (point d'entrée stable pour FluxCD)
+            type=semver,pattern={{major}}
+            # Latest : toujours sur le dernier tag
+            type=raw,value=latest
 
       # 4. Construction et Envoi (Build & Push)
       - name: Build and push Docker image
