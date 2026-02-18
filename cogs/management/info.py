@@ -38,11 +38,11 @@ class InfoCog(commands.Cog):
         embed.add_field(name="Participants", value=", ".join(DEVELOPPEURS), inline=False)
 
         # --- Footer ---
-        embed.set_footer(text=f"{VERSION} | *💖 Développé par la promo 2025 du BTS SIO*")
+        embed.set_footer(text=f"{VERSION} | 💖 Développé par la promo 2025 du BTS SIO")
 
         # --- Boutons ---
         view = discord.ui.View()
-        view.add_item(discord.ui.Button(label="Repo Gitlab", url="https://gitlab.loutik.fr/bts-sio/bot-plc"))
+        view.add_item(discord.ui.Button(label="GitHub", url="https://github.com/lycee-paul-louis-courier-bts-sio/discord-bot-plc"))
         view.add_item(discord.ui.Button(
             label="Tableau Kanban",
             url=(
